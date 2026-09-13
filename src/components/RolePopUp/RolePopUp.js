@@ -2,11 +2,11 @@ import { useTranslation } from "react-i18next";
 
 import "./RolePopUp.css";
 
-function RolePopUp({ status, value, handleClose, place }) {
+function RolePopUp({ value, handleClose, place }) {
   const { t } = useTranslation();
 
   return (
-    <div className={`popup-overlay ${status}`}>
+    <div className="popup-overlay">
       <div className="popup">
         <button className="close-btn" onClick={handleClose}>
           X

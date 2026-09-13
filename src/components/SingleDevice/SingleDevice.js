@@ -5,7 +5,6 @@ import SingleDeviceGame from "../SingleDeviceGame/SingleDeviceGame";
 import "./SingleDevice.css";
 
 function SingleDevice() {
-  const [addedPlaces, setAddedPlaces] = useState([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(true);
 
   const startGame = () => {
@@ -17,21 +16,10 @@ function SingleDevice() {
   };
 
   if (isSettingsOpen) {
-    return (
-      <SingleDeviceSettings
-        addedPlaces={addedPlaces}
-        setAddedPlaces={setAddedPlaces}
-        startGame={startGame}
-      />
-    );
+    return <SingleDeviceSettings startGame={startGame} />;
   }
 
-  return (
-    <SingleDeviceGame
-      openSettings={openSettings}
-      addedPlaces={addedPlaces}
-    />
-  );
+  return <SingleDeviceGame openSettings={openSettings} />;
 }
 
 export default SingleDevice;

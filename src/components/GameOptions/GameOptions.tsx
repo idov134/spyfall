@@ -18,18 +18,16 @@ type Icon = {
 type Option = {
   name: string;
   link: string;
+  implemented?: boolean;
   icon: Icon;
 };
 
 export const GameOptions = (): ReactElement => {
-  const options = useMemo(
-    (): Array<Option> => schema.gameOptions,
-    [schema.gameOptions]
-  );
+  const options = useMemo((): Array<Option> => schema.gameOptions, []);
   return (
     <div className="options">
       {options.map((option: Option) => (
-        <GameOption option={option} />
+        <GameOption key={option.link} option={option} />
       ))}
     </div>
   );
@@ -40,13 +38,21 @@ const GameOption = ({ option }: { option: Option }): ReactElement => {
   const IconComponent = iconComponents[
     option.icon.iconName
   ] as React.ComponentType;
+  const implemented = option.implemented !== false;
 
-  return (
-    <Link to={option.link}>
-      <div className="game-option">
-        <span className="btn-txt">{t(option.name)}</span>
-        <IconComponent />
-      </div>
-    </Link>
+  const content = (
+    <div className={`game-option${implemented ? "" : " disabled"}`}>
+      <span className="btn-txt">{t(option.name)}</span>
+      {IconComponent ? <IconComponent /> : null}
+      {!implemented && (
+        <span className="coming-soon">{t("Coming soon")}</span>
+      )}
+    </div>
   );
+
+  if (!implemented) {
+    return content;
+  }
+
+  return <Link to={option.link}>{content}</Link>;
 };

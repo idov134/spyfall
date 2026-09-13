@@ -9,8 +9,31 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import RolePopUp from "../RolePopUp/RolePopUp";
 
 import getPlace from "../../services/GeminiService";
+import { getRandomDefaultPlace } from "../../data/places";
 
 import isEmptyArray from "../../utils";
+
+function createPlayerCards(playerCount) {
+  return Array.from({ length: playerCount }, () => ({
+    role: "Player",
+    opened: false,
+  }));
+}
+
+function assignSpies(playerCount, spyCount) {
+  const optionsCopy = createPlayerCards(playerCount);
+  let remainingSpies = Math.min(spyCount, playerCount);
+
+  while (remainingSpies > 0) {
+    const randomIndex = Math.floor(Math.random() * playerCount);
+    if (optionsCopy[randomIndex].role !== "Spy") {
+      optionsCopy[randomIndex] = { role: "Spy", opened: false };
+      remainingSpies--;
+    }
+  }
+
+  return optionsCopy;
+}
 
 function SingleDeviceGame({ openSettings }) {
   const players = useSelector((state) => state.settings.players);
@@ -19,9 +42,7 @@ function SingleDeviceGame({ openSettings }) {
 
   const { t, i18n } = useTranslation();
 
-  const [options, setOptions] = useState(
-    Array(players).fill({ role: "Player", opened: false })
-  );
+  const [options, setOptions] = useState(() => createPlayerCards(players));
   const [gameCount, setGameCount] = useState(0);
   const [openedRole, setOpenedRole] = useState("");
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
@@ -29,39 +50,33 @@ function SingleDeviceGame({ openSettings }) {
 
   useEffect(() => {
     setPlace(t("Loading..."));
-    // Create a copy of the options array to work with
-    let optionsCopy = [...options];
-    let spyCount = spies;
+    setOptions(assignSpies(players, spies));
 
-    while (spyCount > 0) {
-      // Get a random index
-      const randomIndex = Math.floor(Math.random() * players);
-
-      // If the randomly selected position is not already an spy, assign an spy
-      if (optionsCopy[randomIndex].role !== "Spy") {
-        optionsCopy[randomIndex] = { role: "Spy", opened: false };
-        spyCount--;
-      }
-    }
-
-    // Update the options state with the new array
-    setOptions(optionsCopy);
     if (!isEmptyArray(addedPlaces)) {
-      setPlace(getRandomPlace());
-    } else {
-      getPlace(i18n.language).then((res) => setPlace(res));
+      const randomIndex = Math.floor(Math.random() * addedPlaces.length);
+      setPlace(addedPlaces[randomIndex]);
+      return;
     }
-  }, [gameCount]);
 
-  const getRandomPlace = () => {
-    const randomIndex = Math.floor(Math.random() * addedPlaces.length);
-    return addedPlaces[randomIndex];
-  };
+    let cancelled = false;
+    getPlace(i18n.language).then((res) => {
+      if (!cancelled) {
+        setPlace(res || getRandomDefaultPlace(i18n.language));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // Re-deal only when a new round starts (or on first mount).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameCount]);
 
   const openCard = (index) => {
     if (options[index - 1].opened) return;
-    let optionsCopy = [...options];
-    optionsCopy[index - 1] = { ...optionsCopy[index - 1], opened: true };
+    const optionsCopy = options.map((option, optionIndex) =>
+      optionIndex === index - 1 ? { ...option, opened: true } : option
+    );
     setOptions(optionsCopy);
     setOpenedRole(optionsCopy[index - 1].role);
     setIsPopUpOpen(true);
@@ -87,8 +102,8 @@ function SingleDeviceGame({ openSettings }) {
         <div className="options-grid">
           {options.map((option, index) => (
             <OptionCard
+              key={index}
               index={index + 1}
-              value={option.role}
               opened={option.opened}
               openCard={openCard}
             />
@@ -98,7 +113,8 @@ function SingleDeviceGame({ openSettings }) {
         <div
           className="start-game-btn"
           onClick={() => {
-            setOptions(Array(players).fill({ role: "Player", opened: false }));
+            setIsPopUpOpen(false);
+            setOptions(createPlayerCards(players));
             setGameCount((prev) => prev + 1);
           }}
         >

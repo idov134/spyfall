@@ -8,17 +8,17 @@ import "../../i18n";
 import { useLanguage } from "../../hooks/useLanguage";
 
 function NavBar() {
-  const { isEn, changeLanguage, translate } = useLanguage(true);
+  const { toggleLanguage, translate } = useLanguage();
 
   return (
     <header className="navbar-container">
-      <div className="lang-icon" onClick={() => changeLanguage(() => !isEn)}>
+      <div className="lang-icon" onClick={toggleLanguage}>
         <LanguageIcon fontSize="large" />
       </div>
       <Link to="/">
         <div className="game-name">{translate("Spyfall")} 🕵️</div>
       </Link>
-      <img className="logo" src={logo} />
+      <img className="logo" src={logo} alt="" />
     </header>
   );
 }

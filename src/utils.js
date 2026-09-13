@@ -3,13 +3,15 @@ export default function isEmptyArray(array) {
 }
 
 export function addItem(arr, item) {
-  return [...arr, item]
+  return [...arr, item];
 }
 
 export function removeItem(arr, itemIndex) {
-  return [...arr.slice(0, itemIndex), ...arr.slice(itemIndex + 1)]
+  return [...arr.slice(0, itemIndex), ...arr.slice(itemIndex + 1)];
 }
 
 export function isValidPlace(place) {
-  return place && place.trimplace.length >= 2 && place.length <= 30
+  if (typeof place !== "string") return false;
+  const trimmed = place.trim();
+  return trimmed.length >= 2 && trimmed.length <= 30;
 }

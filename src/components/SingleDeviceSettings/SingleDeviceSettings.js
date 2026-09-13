@@ -44,7 +44,7 @@ function SingleDeviceSettings({ startGame }) {
     const trimedNewPlace = newPlace.trim();
     if (!isValidPlace(trimedNewPlace)) return;
     setIsPopUpOpen(false);
-    dispatch(addPlace({ trimedNewPlace }));
+    dispatch(addPlace({ newPlace: trimedNewPlace }));
   };
 
   const handleAdd = (index) => {

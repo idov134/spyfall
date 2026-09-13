@@ -23,7 +23,6 @@ function AddedPlace({ addedPlace, index, handleRemove }) {
 
 function AddPlaces({ handleRemove, addedPlaces, openAddPlace }) {
   const { t } = useTranslation();
-  console.log(addedPlaces);
   return (
     <div className="add-places-setting">
       <button onClick={openAddPlace} className="add-place-btn">
@@ -35,6 +34,7 @@ function AddPlaces({ handleRemove, addedPlaces, openAddPlace }) {
         <div className="added-places">
           {addedPlaces.map((addedPlace, index) => (
             <AddedPlace
+              key={`${addedPlace}-${index}`}
               addedPlace={addedPlace}
               index={index}
               handleRemove={handleRemove}

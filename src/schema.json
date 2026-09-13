@@ -3,6 +3,7 @@
     {
       "name": "Single Device",
       "link": "/single",
+      "implemented": true,
       "icon": {
         "iconName": "SmartphoneIcon",
         "iconFont": "large"
@@ -11,6 +12,7 @@
     {
       "name": "Create Room",
       "link": "/multiple",
+      "implemented": false,
       "icon": {
         "iconName": "GroupsIcon",
         "iconFont": "large"

@@ -6,6 +6,7 @@
 }
 
 .game-option {
+  position: relative;
   border: 0;
   background: hsla(265, 53%, 29%, 1);
   background: linear-gradient(
@@ -32,6 +33,19 @@
   font-size: 1rem;
   padding: 1rem;
   font-weight: bold;
+}
+
+.game-option.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  padding-bottom: 1.75rem;
+}
+
+.coming-soon {
+  position: absolute;
+  bottom: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .btn-txt {

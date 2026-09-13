@@ -26,7 +26,9 @@ const settingsSlice = createSlice({
       if (state.spies - 1 > 0) state.spies -= 1;
     },
     addPlace: (state, action) => {
-      state.addedPlaces = addItem(state.addedPlaces, action.payload.newPlace);
+      const newPlace = action.payload?.newPlace?.trim();
+      if (!newPlace) return;
+      state.addedPlaces = addItem(state.addedPlaces, newPlace);
     },
     removePlace: (state, action) => {
       state.addedPlaces = removeItem(state.addedPlaces, action.payload.index);

@@ -24,6 +24,7 @@ const resources = {
       "Go Home": "חזור לדף הבית",
       "Add Places": "הוסף מקומות",
       "Add": "הוסף",
+      "Coming soon": "בקרוב",
     }
   }
 };
@@ -33,6 +34,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false // React already does escaping
     }
