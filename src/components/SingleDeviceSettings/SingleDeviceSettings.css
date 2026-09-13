@@ -58,8 +58,22 @@
 }
 
 .change-btn {
+  border: 0;
   border-radius: 50%;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.change-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .setting-label {
@@ -82,6 +96,8 @@
 }
 
 .start-game-btn {
+  border: 0;
+  font: inherit;
   width: 15vw;
   min-width: 150px;
   margin: auto;
@@ -97,4 +113,18 @@
 
 .start-game-btn:hover {
   background-color: rgba(255, 255, 255, 0.4);
+}
+
+.start-game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.settings-error {
+  color: #ffd7d7;
+  font-size: 0.85rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
 }

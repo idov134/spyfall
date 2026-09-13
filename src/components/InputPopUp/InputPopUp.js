@@ -1,34 +1,62 @@
 import { useTranslation } from "react-i18next";
+import { useEffect, useRef, useState } from "react";
 
 import "./InputPopUp.css";
-import { useState } from "react";
 
-function PopUpContent({ handleSubmit }) {
+function InputPopUp({ handleClose, handleSubmit, label, error }) {
   const { t } = useTranslation();
-  const [val, setVal] = useState("");
+  const [value, setValue] = useState("");
+  const inputRef = useRef(null);
 
-  const onChange = (event) => {
-    setVal(event.target.value);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const submit = () => handleSubmit(value);
+
+  const onKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submit();
+    } else if (event.key === "Escape") {
+      handleClose();
+    }
   };
 
-  return (
-    <div className="popup-content">
-      <input type="text" onChange={(e) => onChange(e)} value={val} />
-      <button className="add-place-button" onClick={() => handleSubmit(val)}>
-        {t("Add")}
-      </button>
-    </div>
-  );
-}
+  const dialogLabel = label || t("Add Places");
 
-function InputPopUp({ handleClose, handleSubmit }) {
   return (
-    <div className={`popup-overlay`}>
+    <div className="popup-overlay" role="dialog" aria-modal="true" aria-label={dialogLabel}>
       <div className="popup">
-        <button className="close-btn" onClick={handleClose}>
+        <button
+          type="button"
+          className="close-btn"
+          onClick={handleClose}
+          aria-label={t("Close")}
+        >
           X
         </button>
-        <PopUpContent handleSubmit={handleSubmit} />
+        <div className="popup-content">
+          <label htmlFor="new-location-input" className="visually-hidden">
+            {dialogLabel}
+          </label>
+          <input
+            id="new-location-input"
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          <button type="button" className="add-place-button" onClick={submit}>
+            {t("Add")}
+          </button>
+        </div>
+        {error && (
+          <div className="popup-error" role="alert">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

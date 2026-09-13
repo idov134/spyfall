@@ -1,127 +1,151 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
 import "./SingleDeviceGame.css";
 
-import OptionCard from "../OptionsCard/OptionsCard";
 import SettingsIcon from "@mui/icons-material/Settings";
-import RolePopUp from "../RolePopUp/RolePopUp";
 
-import getPlace from "../../services/GeminiService";
-import { getRandomDefaultPlace } from "../../data/places";
+import { createRound, getRevealForPlayer } from "../../game/gameLogic";
+import { BUILT_IN_LOCATIONS, toLocationObject } from "../../data/locations";
 
-import isEmptyArray from "../../utils";
+const MAX_RECENT_LOCATIONS = 3;
 
-function createPlayerCards(playerCount) {
-  return Array.from({ length: playerCount }, () => ({
-    role: "Player",
-    opened: false,
-  }));
+function buildRound(players, spies, customLocations, excludeIds) {
+  return createRound({
+    players,
+    spies,
+    builtIn: BUILT_IN_LOCATIONS,
+    custom: customLocations.map(toLocationObject),
+    excludeIds,
+  });
 }
 
-function assignSpies(playerCount, spyCount) {
-  const optionsCopy = createPlayerCards(playerCount);
-  let remainingSpies = Math.min(spyCount, playerCount);
+/**
+ * One player's private turn: a concealed instruction to pass the device,
+ * a deliberate "Reveal card" tap, then "Hide card" before handing the
+ * device to the next player. The role never appears without that tap, and
+ * hiding it is required before moving on.
+ */
+function PlayerTurnCard({ playerNumber, totalPlayers, isRevealed, isSpy, locationName, onReveal, onHide }) {
+  const { t } = useTranslation();
 
-  while (remainingSpies > 0) {
-    const randomIndex = Math.floor(Math.random() * playerCount);
-    if (optionsCopy[randomIndex].role !== "Spy") {
-      optionsCopy[randomIndex] = { role: "Spy", opened: false };
-      remainingSpies--;
-    }
-  }
+  return (
+    <div className="player-turn-card">
+      {!isRevealed && (
+        <>
+          <p className="pass-instruction">
+            {t("Pass the device to Player {{number}}.", { number: playerNumber })}
+          </p>
+          <p className="player-progress">
+            {t("Player {{current}} of {{total}}", { current: playerNumber, total: totalPlayers })}
+          </p>
+          <button type="button" className="reveal-btn" onClick={onReveal}>
+            {t("Reveal card")}
+          </button>
+        </>
+      )}
 
-  return optionsCopy;
+      {isRevealed && (
+        <>
+          <div className="role-reveal" role="status">
+            <h1>{isSpy ? t("You are the Spy.") : locationName}</h1>
+          </div>
+          <button type="button" className="hide-btn" onClick={onHide}>
+            {t("Hide card")}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Neutral screen shown once every player has viewed and hidden their card. */
+function DiscussionScreen() {
+  const { t } = useTranslation();
+  return (
+    <div className="discussion-screen">
+      <h2>{t("Everyone has viewed their card")}</h2>
+      <p>{t("Start discussion")}</p>
+    </div>
+  );
 }
 
 function SingleDeviceGame({ openSettings }) {
   const players = useSelector((state) => state.settings.players);
   const spies = useSelector((state) => state.settings.spies);
-  const addedPlaces = useSelector((state) => state.settings.addedPlaces);
+  const customLocations = useSelector((state) => state.settings.customLocations);
 
   const { t, i18n } = useTranslation();
 
-  const [options, setOptions] = useState(() => createPlayerCards(players));
-  const [gameCount, setGameCount] = useState(0);
-  const [openedRole, setOpenedRole] = useState("");
-  const [isPopUpOpen, setIsPopUpOpen] = useState(false);
-  const [place, setPlace] = useState("");
+  const [round, setRound] = useState(() => buildRound(players, spies, customLocations, []));
+  const [recentLocationIds, setRecentLocationIds] = useState(() =>
+    round.location ? [round.location.id] : []
+  );
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const [isRevealed, setIsRevealed] = useState(false);
+  const [phase, setPhase] = useState("passing"); // "passing" | "discussion"
 
-  useEffect(() => {
-    setPlace(t("Loading..."));
-    setOptions(assignSpies(players, spies));
+  const isLastPlayer = currentPlayerIndex >= players - 1;
 
-    if (!isEmptyArray(addedPlaces)) {
-      const randomIndex = Math.floor(Math.random() * addedPlaces.length);
-      setPlace(addedPlaces[randomIndex]);
-      return;
-    }
-
-    let cancelled = false;
-    getPlace(i18n.language).then((res) => {
-      if (!cancelled) {
-        setPlace(res || getRandomDefaultPlace(i18n.language));
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-    // Re-deal only when a new round starts (or on first mount).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameCount]);
-
-  const openCard = (index) => {
-    if (options[index - 1].opened) return;
-    const optionsCopy = options.map((option, optionIndex) =>
-      optionIndex === index - 1 ? { ...option, opened: true } : option
+  const startNewRound = () => {
+    const nextRound = buildRound(players, spies, customLocations, recentLocationIds);
+    setRound(nextRound);
+    setRecentLocationIds((previous) =>
+      nextRound.location
+        ? [nextRound.location.id, ...previous].slice(0, MAX_RECENT_LOCATIONS)
+        : previous
     );
-    setOptions(optionsCopy);
-    setOpenedRole(optionsCopy[index - 1].role);
-    setIsPopUpOpen(true);
+    setCurrentPlayerIndex(0);
+    setIsRevealed(false);
+    setPhase("passing");
   };
 
-  const handleClose = () => {
-    setIsPopUpOpen(false);
+  const handleReveal = () => setIsRevealed(true);
+
+  const handleHide = () => {
+    setIsRevealed(false);
+    if (isLastPlayer) {
+      setPhase("discussion");
+    } else {
+      setCurrentPlayerIndex((index) => index + 1);
+    }
   };
+
+  const reveal = getRevealForPlayer({ round, playerIndex: currentPlayerIndex, lang: i18n.language });
 
   return (
-    <>
-      {isPopUpOpen && (
-        <RolePopUp value={openedRole} handleClose={handleClose} place={place} />
-      )}
-      <div className="single-device-game page-container">
-        <div className="title with-setting-icon">
-          <div className="title-txt">{t("Would you find the Spy?")}</div>
-          <div className="setting-icon">
-            <SettingsIcon onClick={() => openSettings()} />
-          </div>
-        </div>
-
-        <div className="options-grid">
-          {options.map((option, index) => (
-            <OptionCard
-              key={index}
-              index={index + 1}
-              opened={option.opened}
-              openCard={openCard}
-            />
-          ))}
-        </div>
-
-        <div
-          className="start-game-btn"
-          onClick={() => {
-            setIsPopUpOpen(false);
-            setOptions(createPlayerCards(players));
-            setGameCount((prev) => prev + 1);
-          }}
+    <div className="single-device-game page-container">
+      <div className="title with-setting-icon">
+        <div className="title-txt">{t("Spyfall")}</div>
+        <button
+          type="button"
+          className="setting-icon"
+          aria-label={t("Settings")}
+          onClick={openSettings}
         >
-          {t("Start New Game")}
-        </div>
+          <SettingsIcon />
+        </button>
       </div>
-    </>
+
+      {phase === "passing" ? (
+        <PlayerTurnCard
+          playerNumber={currentPlayerIndex + 1}
+          totalPlayers={players}
+          isRevealed={isRevealed}
+          isSpy={reveal.isSpy}
+          locationName={reveal.locationName}
+          onReveal={handleReveal}
+          onHide={handleHide}
+        />
+      ) : (
+        <DiscussionScreen />
+      )}
+
+      <button type="button" className="start-game-btn" onClick={startNewRound}>
+        {t("New round")}
+      </button>
+    </div>
   );
 }
 

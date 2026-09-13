@@ -28,6 +28,7 @@
 .add-place-btn {
   cursor: pointer;
   border: 0;
+  font: inherit;
   background-color: rgba(0, 0, 0, 0.15);
   color: white;
   padding: 0.3rem;
@@ -36,6 +37,11 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.change-btn.delete {
+  background-color: rgb(214, 62, 62);
+  color: white;
 }
 
 .add-places-setting {

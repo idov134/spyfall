@@ -40,5 +40,24 @@
 
 .add-place-button {
   background-color: rgba(212, 166, 81, 0.351);
+  border: 0;
+  font: inherit;
   cursor: pointer;
+  border-radius: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.popup-content input {
+  font: inherit;
+  padding: 0.4rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.popup-error {
+  color: #b00020;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  text-align: center;
 }

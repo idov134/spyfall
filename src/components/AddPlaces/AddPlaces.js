@@ -5,40 +5,41 @@ import RemoveIcon from "@mui/icons-material/Remove";
 
 import "./AddPlaces.css";
 
-import isEmptyArray from "../../utils";
+function CustomLocationChip({ location, onRemove }) {
+  const { t } = useTranslation();
+  const displayName =
+    location.name.length > 12 ? `${location.name.slice(0, 12)}...` : location.name;
 
-function AddedPlace({ addedPlace, index, handleRemove }) {
   return (
     <div className="added-place">
-      <div className="place-text">
-        {addedPlace.length > 8 ? `${addedPlace.slice(0, 8)}...` : addedPlace}
+      <div className="place-text" title={location.name}>
+        {displayName}
       </div>
-      <RemoveIcon
+      <button
+        type="button"
         className="change-btn delete"
-        onClick={() => handleRemove(index)}
-      />
+        aria-label={t("Remove location: {{name}}", { name: location.name })}
+        onClick={() => onRemove(location.id)}
+      >
+        <RemoveIcon fontSize="small" />
+      </button>
     </div>
   );
 }
 
-function AddPlaces({ handleRemove, addedPlaces, openAddPlace }) {
+function AddPlaces({ handleRemove, customLocations, openAddPlace }) {
   const { t } = useTranslation();
   return (
     <div className="add-places-setting">
-      <button onClick={openAddPlace} className="add-place-btn">
+      <button type="button" onClick={openAddPlace} className="add-place-btn">
         <AddIcon fontSize="small" />
         {t("Add Places")}
       </button>
 
-      {!isEmptyArray(addedPlaces) && (
+      {customLocations.length > 0 && (
         <div className="added-places">
-          {addedPlaces.map((addedPlace, index) => (
-            <AddedPlace
-              key={`${addedPlace}-${index}`}
-              addedPlace={addedPlace}
-              index={index}
-              handleRemove={handleRemove}
-            />
+          {customLocations.map((location) => (
+            <CustomLocationChip key={location.id} location={location} onRemove={handleRemove} />
           ))}
         </div>
       )}
