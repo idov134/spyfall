@@ -52,60 +52,158 @@
   padding: 0;
 }
 
-.player-turn-card {
+.phase-instruction {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 0 1.25rem;
+  text-align: center;
+}
+
+.discussion-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.discussion-banner h2 {
+  margin: 0;
+}
+
+.discussion-banner p {
+  margin: 0;
+}
+
+.discussion-hint {
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+/* --- Player card grid --- */
+
+.player-card-grid {
+  margin: 0 auto 1.5rem;
+}
+
+.player-card {
+  border-radius: 1rem !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: white !important;
+}
+
+.player-card--viewed {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  opacity: 0.6;
+}
+
+.player-card-action {
+  height: 100%;
+}
+
+.player-card-action.Mui-disabled {
+  opacity: 1;
+}
+
+.player-card-content {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem 0.5rem !important;
+  min-height: 5.5rem;
+  text-align: center;
+}
+
+.player-card-icon {
+  font-size: 1.75rem !important;
+}
+
+.player-card-label {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.player-card-status {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* --- Reveal modal --- */
+
+.reveal-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 88%;
+  max-width: 360px;
+  background: hsla(265, 45%, 22%, 1);
+  color: white;
+  border-radius: 1rem;
+  padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 2rem 1rem;
-  min-height: 12rem;
-  justify-content: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  text-align: center;
 }
 
-.pass-instruction {
-  font-size: 1.3rem;
-  font-weight: bold;
+.reveal-modal-title {
   margin: 0;
-}
-
-.player-progress {
+  font-size: 1.1rem;
   opacity: 0.85;
-  font-size: 0.95rem;
-  margin: 0;
 }
 
-.role-reveal {
-  min-height: 3rem;
+.reveal-modal-secret {
+  min-height: 4rem;
   display: flex;
   align-items: center;
   justify-content: center;
   word-break: break-word;
 }
 
-.reveal-btn,
-.hide-btn {
+.reveal-modal-secret-text {
+  margin: 0;
+}
+
+.reveal-modal-hint {
+  margin: 0;
+  opacity: 0.75;
+  font-size: 0.95rem;
+}
+
+.reveal-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.hide-btn,
+.hold-reveal-btn {
   border: 0;
   font: inherit;
   border-radius: 12px;
   padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
   box-shadow: 0px 0px 20px -10px #ffffff;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
-.reveal-btn:hover,
-.hide-btn:hover {
+.hide-btn:hover,
+.hold-reveal-btn:hover {
   background-color: rgba(255, 255, 255, 0.4);
 }
 
-.discussion-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 2rem 1rem;
-  min-height: 12rem;
-  justify-content: center;
+.hold-reveal-btn.is-holding {
+  background-color: rgba(255, 255, 255, 0.5);
 }

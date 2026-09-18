@@ -33,16 +33,35 @@ const resources = {
       "The number of spies must be lower than the number of players":
         "The number of spies must be lower than the number of players",
       "Settings": "Settings",
-      "Pass the device to Player {{number}}.": "Pass the device to Player {{number}}.",
-      "Player {{current}} of {{total}}": "Player {{current}} of {{total}}",
-      "Reveal card": "Reveal card",
-      "Hide card": "Hide card",
       "You are the Spy.": "You are the Spy.",
       "Everyone has viewed their card": "Everyone has viewed their card",
       "Start discussion": "Start discussion",
       "New round": "New round",
       "404 Not Found / How did you get here?": "404 Not Found / How did you get here?",
       "Go Home": "Go Home",
+
+      // Card grid gameplay flow
+      "Pass the device around: tap your card to view your role.":
+        "Pass the device around: tap your card to view your role.",
+      "Tap your card and hold to check your role again.":
+        "Tap your card and hold to check your role again.",
+      "Player {{number}}": "Player {{number}}",
+      "Player {{number}} - tap to view card": "Player {{number}} - tap to view card",
+      "Player {{number}} - card viewed": "Player {{number}} - card viewed",
+      "Viewed": "Viewed",
+      "Tap to remind yourself": "Tap to remind yourself",
+      "Press and hold to reveal": "Press and hold to reveal",
+      "Hold to reveal": "Hold to reveal",
+      "Got it, hide card": "Got it, hide card",
+
+      // Language selector
+      "Select language": "Select language",
+
+      // Locations reference modal
+      "View Locations": "View Locations",
+      "All Locations": "All Locations",
+      "Search locations…": "Search locations…",
+      "No locations found": "No locations found",
     },
   },
   he: {
@@ -72,16 +91,35 @@ const resources = {
       "The number of spies must be lower than the number of players":
         "כמות המרגלים צריכה להיות קטנה ממספר השחקנים",
       "Settings": "הגדרות",
-      "Pass the device to Player {{number}}.": "העבר את המכשיר לשחקן {{number}}",
-      "Player {{current}} of {{total}}": "שחקן {{current}} מתוך {{total}}",
-      "Reveal card": "חשוף קלף",
-      "Hide card": "הסתר קלף",
       "You are the Spy.": "אתה המרגל",
       "Everyone has viewed their card": "כולם ראו את הקלף שלהם",
       "Start discussion": "התחילו בדיון",
       "New round": "סיבוב חדש",
       "404 Not Found / How did you get here?": "שגיאת 404 / איך הגעת לפה?",
       "Go Home": "חזור לדף הבית",
+
+      // Card grid gameplay flow
+      "Pass the device around: tap your card to view your role.":
+        "העבירו את המכשיר בין השחקנים: הקישו על הקלף שלכם כדי לראות את התפקיד.",
+      "Tap your card and hold to check your role again.":
+        "הקישו והחזיקו על הקלף שלכם כדי לבדוק שוב את התפקיד.",
+      "Player {{number}}": "שחקן {{number}}",
+      "Player {{number}} - tap to view card": "שחקן {{number}} - הקישו כדי לראות את הקלף",
+      "Player {{number}} - card viewed": "שחקן {{number}} - הקלף נצפה",
+      "Viewed": "נצפה",
+      "Tap to remind yourself": "הקישו כדי להזכיר לעצמכם",
+      "Press and hold to reveal": "לחצו והחזיקו כדי לחשוף",
+      "Hold to reveal": "החזק כדי לחשוף",
+      "Got it, hide card": "הבנתי, הסתר קלף",
+
+      // Language selector
+      "Select language": "בחר שפה",
+
+      // Locations reference modal
+      "View Locations": "צפה במקומות",
+      "All Locations": "כל המקומות",
+      "Search locations…": "חיפוש מקומות…",
+      "No locations found": "לא נמצאו מקומות",
     },
   },
 };
