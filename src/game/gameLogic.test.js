@@ -4,7 +4,9 @@ import {
   MIN_SPIES,
   assignRoles,
   createRound,
+  didCatchSpy,
   getRevealForPlayer,
+  isCorrectLocationGuess,
   pickLocation,
   shuffle,
   validateSettings,
@@ -181,5 +183,40 @@ describe("createRound + getRevealForPlayer", () => {
 
     expect(en.locationName).toBe(round.location.names.en);
     expect(he.locationName).toBe(round.location.names.he);
+  });
+});
+
+describe("didCatchSpy", () => {
+  it("returns true only for a player who was actually a spy", () => {
+    const round = createRound({
+      players: 5,
+      spies: 1,
+      builtIn: BUILT_IN_LOCATIONS,
+      rng: sequenceRng([0.4]),
+    });
+    const spyIndex = round.roles.findIndex((role) => role === "spy");
+    const playerIndex = round.roles.findIndex((role) => role === "player");
+
+    expect(didCatchSpy({ round, playerIndex: spyIndex })).toBe(true);
+    expect(didCatchSpy({ round, playerIndex })).toBe(false);
+  });
+});
+
+describe("isCorrectLocationGuess", () => {
+  it("matches only the round's actual location id", () => {
+    const round = createRound({
+      players: 4,
+      spies: 1,
+      builtIn: BUILT_IN_LOCATIONS,
+      rng: sequenceRng([0.15]),
+    });
+
+    expect(isCorrectLocationGuess({ round, locationId: round.location.id })).toBe(true);
+    expect(isCorrectLocationGuess({ round, locationId: "definitely-not-it" })).toBe(false);
+  });
+
+  it("returns false when the round has no location", () => {
+    const round = { roles: ["player"], location: null };
+    expect(isCorrectLocationGuess({ round, locationId: "anything" })).toBe(false);
   });
 });

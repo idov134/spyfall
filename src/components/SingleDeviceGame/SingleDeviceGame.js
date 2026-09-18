@@ -12,11 +12,21 @@ import CardContent from "@mui/material/CardContent";
 import Modal from "@mui/material/Modal";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PersonIcon from "@mui/icons-material/Person";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import StopIcon from "@mui/icons-material/Stop";
 
 import { createRound, getRevealForPlayer } from "../../game/gameLogic";
 import { BUILT_IN_LOCATIONS, toLocationObject } from "../../data/locations";
 
 const MAX_RECENT_LOCATIONS = 3;
+
+function formatTime(totalSeconds) {
+  const clamped = Math.max(0, Math.floor(totalSeconds));
+  const minutes = Math.floor(clamped / 60);
+  const seconds = clamped % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
 function buildRound(players, spies, customLocations, excludeIds) {
   return createRound({
@@ -169,6 +179,44 @@ function RevealModal({ open, mode, playerNumber, isSpy, locationName, isHolding,
   );
 }
 
+/**
+ * The countdown clock. It is rendered right under the title bar for the
+ * entire active round — both while cards are being passed around and during
+ * discussion — so players always have it in view, not just once discussion
+ * officially starts.
+ */
+function GameTimer({ remainingSeconds, isRunning, onToggleRunning, onStop }) {
+  const { t } = useTranslation();
+  const timeIsUp = remainingSeconds === 0;
+
+  return (
+    <div className="game-timer">
+      <div className="game-timer-value" role="timer">
+        {formatTime(remainingSeconds)}
+      </div>
+      {timeIsUp ? (
+        <div className="game-timer-up">{t("Time's up!")}</div>
+      ) : (
+        <div className="game-timer-controls">
+          <button
+            type="button"
+            className="timer-btn"
+            onClick={onToggleRunning}
+            aria-label={isRunning ? t("Pause") : t("Resume")}
+          >
+            {isRunning ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+            {isRunning ? t("Pause") : t("Resume")}
+          </button>
+          <button type="button" className="timer-btn timer-btn-stop" onClick={onStop}>
+            <StopIcon fontSize="small" />
+            {t("End round now")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Neutral banner shown once every player has viewed their card. */
 function DiscussionBanner() {
   const { t } = useTranslation();
@@ -184,9 +232,12 @@ function DiscussionBanner() {
 function SingleDeviceGame({ openSettings }) {
   const players = useSelector((state) => state.settings.players);
   const spies = useSelector((state) => state.settings.spies);
+  const timerMinutes = useSelector((state) => state.settings.timerMinutes);
   const customLocations = useSelector((state) => state.settings.customLocations);
 
   const { t, i18n } = useTranslation();
+
+  const discussionDurationSeconds = timerMinutes * 60;
 
   const [round, setRound] = useState(() => buildRound(players, spies, customLocations, []));
   const [recentLocationIds, setRecentLocationIds] = useState(() =>
@@ -196,17 +247,41 @@ function SingleDeviceGame({ openSettings }) {
   const [phase, setPhase] = useState("viewing"); // "viewing" | "discussion"
   const [activePlayerIndex, setActivePlayerIndex] = useState(null);
   const [isHolding, setIsHolding] = useState(false);
+  // The countdown starts the moment the round begins — visible the whole
+  // time cards are being passed around, not just once discussion starts —
+  // so it's always in view while "the game is running".
+  const [remainingSeconds, setRemainingSeconds] = useState(discussionDurationSeconds);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
 
   const allViewed = viewed.length > 0 && viewed.every(Boolean);
 
-  // Once the last card is closed, move everyone to discussion automatically
-  // rather than requiring an extra button — nobody's card stays exposed in
-  // the meantime because closing a card is what marks it Viewed.
+  // Once the last card is closed, move everyone to discussion. The
+  // countdown keeps running uninterrupted — it never resets here.
   useEffect(() => {
     if (phase === "viewing" && allViewed) {
       setPhase("discussion");
     }
   }, [phase, allViewed]);
+
+  // The countdown itself. Cleared on every re-run (pause/resume, unmount, or
+  // reaching zero) so there is never more than one interval alive. Runs
+  // during both "viewing" and "discussion" so the clock is always visible
+  // and ticking while the round is active.
+  useEffect(() => {
+    if (!isTimerRunning) return undefined;
+    const intervalId = setInterval(() => {
+      setRemainingSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, [isTimerRunning]);
+
+  // Hitting 00:00 just stops the clock and shows "Time's up!" — the game
+  // itself keeps going so the table can keep discussing / voting out loud.
+  useEffect(() => {
+    if (remainingSeconds === 0 && isTimerRunning) {
+      setIsTimerRunning(false);
+    }
+  }, [remainingSeconds, isTimerRunning]);
 
   const startNewRound = () => {
     const nextRound = buildRound(players, spies, customLocations, recentLocationIds);
@@ -220,6 +295,8 @@ function SingleDeviceGame({ openSettings }) {
     setPhase("viewing");
     setActivePlayerIndex(null);
     setIsHolding(false);
+    setRemainingSeconds(discussionDurationSeconds);
+    setIsTimerRunning(true);
   };
 
   const handleSelectPlayer = (index) => {
@@ -238,6 +315,11 @@ function SingleDeviceGame({ openSettings }) {
     }
     setActivePlayerIndex(null);
     setIsHolding(false);
+  };
+
+  const handleStopTimer = () => {
+    setIsTimerRunning(false);
+    setRemainingSeconds(0);
   };
 
   const activeReveal =
@@ -259,13 +341,20 @@ function SingleDeviceGame({ openSettings }) {
         </button>
       </div>
 
-      {phase === "viewing" ? (
+      <GameTimer
+        remainingSeconds={remainingSeconds}
+        isRunning={isTimerRunning}
+        onToggleRunning={() => setIsTimerRunning((previous) => !previous)}
+        onStop={handleStopTimer}
+      />
+
+      {phase === "viewing" && (
         <p className="phase-instruction">
           {t("Pass the device around: tap your card to view your role.")}
         </p>
-      ) : (
-        <DiscussionBanner />
       )}
+
+      {phase === "discussion" && <DiscussionBanner />}
 
       <PlayerCardGrid
         playerCount={players}

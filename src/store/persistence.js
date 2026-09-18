@@ -21,10 +21,11 @@ export function loadPersistedSettings() {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
 
-    const { players, spies, customLocations } = parsed;
+    const { players, spies, customLocations, timerMinutes } = parsed;
     const result = {};
     if (Number.isInteger(players)) result.players = players;
     if (Number.isInteger(spies)) result.spies = spies;
+    if (Number.isInteger(timerMinutes)) result.timerMinutes = timerMinutes;
     if (Array.isArray(customLocations)) {
       result.customLocations = customLocations.filter(
         (location) =>
@@ -48,6 +49,7 @@ export function savePersistedSettings(settings) {
       JSON.stringify({
         players: settings.players,
         spies: settings.spies,
+        timerMinutes: settings.timerMinutes,
         customLocations: settings.customLocations,
       })
     );

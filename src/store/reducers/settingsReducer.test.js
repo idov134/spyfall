@@ -2,13 +2,21 @@ import reducer, {
   addCustomLocation,
   decPlayers,
   decSpies,
+  decTimerMinutes,
   hydrateSettings,
   incPlayers,
   incSpies,
+  incTimerMinutes,
   initialState,
   removeCustomLocation,
 } from "./settingsReducer";
-import { MAX_PLAYERS, MIN_PLAYERS, MIN_SPIES } from "../../game/gameLogic";
+import {
+  MAX_DISCUSSION_MINUTES,
+  MAX_PLAYERS,
+  MIN_DISCUSSION_MINUTES,
+  MIN_PLAYERS,
+  MIN_SPIES,
+} from "../../game/gameLogic";
 
 describe("settingsReducer - player/spy bounds", () => {
   it("increments players up to the maximum", () => {
@@ -53,6 +61,31 @@ describe("settingsReducer - player/spy bounds", () => {
   });
 });
 
+describe("settingsReducer - discussion timer duration", () => {
+  it("increments minutes up to the maximum", () => {
+    let state = { ...initialState, timerMinutes: MAX_DISCUSSION_MINUTES - 1 };
+    state = reducer(state, incTimerMinutes());
+    expect(state.timerMinutes).toBe(MAX_DISCUSSION_MINUTES);
+    state = reducer(state, incTimerMinutes());
+    expect(state.timerMinutes).toBe(MAX_DISCUSSION_MINUTES);
+  });
+
+  it("does not decrement minutes below the minimum", () => {
+    let state = { ...initialState, timerMinutes: MIN_DISCUSSION_MINUTES };
+    state = reducer(state, decTimerMinutes());
+    expect(state.timerMinutes).toBe(MIN_DISCUSSION_MINUTES);
+  });
+
+  it("allows normal increments/decrements within bounds", () => {
+    let state = { ...initialState, timerMinutes: 8 };
+    state = reducer(state, incTimerMinutes());
+    expect(state.timerMinutes).toBe(9);
+    state = reducer(state, decTimerMinutes());
+    state = reducer(state, decTimerMinutes());
+    expect(state.timerMinutes).toBe(7);
+  });
+});
+
 describe("settingsReducer - custom locations", () => {
   it("adds a trimmed custom location", () => {
     const state = reducer(initialState, addCustomLocation("  Grandma's House  "));
@@ -85,16 +118,26 @@ describe("settingsReducer - hydrateSettings", () => {
   it("applies valid persisted values", () => {
     const state = reducer(
       initialState,
-      hydrateSettings({ players: 8, spies: 3, customLocations: [{ id: "x", name: "Y" }] })
+      hydrateSettings({
+        players: 8,
+        spies: 3,
+        timerMinutes: 12,
+        customLocations: [{ id: "x", name: "Y" }],
+      })
     );
     expect(state.players).toBe(8);
     expect(state.spies).toBe(3);
+    expect(state.timerMinutes).toBe(12);
     expect(state.customLocations).toEqual([{ id: "x", name: "Y" }]);
   });
 
   it("ignores invalid/missing fields and keeps existing state", () => {
-    const state = reducer(initialState, hydrateSettings({ players: 0, spies: -1 }));
+    const state = reducer(
+      initialState,
+      hydrateSettings({ players: 0, spies: -1, timerMinutes: 999 })
+    );
     expect(state.players).toBe(initialState.players);
     expect(state.spies).toBe(initialState.spies);
+    expect(state.timerMinutes).toBe(initialState.timerMinutes);
   });
 });

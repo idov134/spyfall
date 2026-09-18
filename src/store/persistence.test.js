@@ -9,16 +9,18 @@ describe("settings persistence", () => {
     expect(loadPersistedSettings()).toBeNull();
   });
 
-  it("round-trips players, spies, and custom locations through localStorage", () => {
+  it("round-trips players, spies, timer duration, and custom locations through localStorage", () => {
     savePersistedSettings({
       players: 9,
       spies: 3,
+      timerMinutes: 10,
       customLocations: [{ id: "custom-1", name: "Grandma's House" }],
     });
 
     expect(loadPersistedSettings()).toEqual({
       players: 9,
       spies: 3,
+      timerMinutes: 10,
       customLocations: [{ id: "custom-1", name: "Grandma's House" }],
     });
   });

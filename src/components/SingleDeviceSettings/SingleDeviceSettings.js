@@ -11,17 +11,22 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import PeopleIcon from "@mui/icons-material/People";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import TimerIcon from "@mui/icons-material/Timer";
 
 import {
   addCustomLocation,
   decPlayers,
   decSpies,
+  decTimerMinutes,
   incPlayers,
   incSpies,
+  incTimerMinutes,
   removeCustomLocation,
 } from "../../store/reducers/settingsReducer";
 import {
+  MAX_DISCUSSION_MINUTES,
   MAX_PLAYERS,
+  MIN_DISCUSSION_MINUTES,
   MIN_PLAYERS,
   MIN_SPIES,
   normalizeLocationName,
@@ -35,6 +40,7 @@ function SingleDeviceSettings({ startGame }) {
 
   const players = useSelector((state) => state.settings.players);
   const spies = useSelector((state) => state.settings.spies);
+  const timerMinutes = useSelector((state) => state.settings.timerMinutes);
   const customLocations = useSelector((state) => state.settings.customLocations);
 
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
@@ -155,6 +161,34 @@ function SingleDeviceSettings({ startGame }) {
               aria-label={t("Increase spies")}
               disabled={spies + 1 >= players}
               onClick={() => dispatch(incSpies())}
+            >
+              <AddIcon fontSize="small" />
+            </button>
+          </div>
+        </div>
+
+        <div className="setting">
+          <span className="setting-label" id="timer-label">
+            <TimerIcon />
+            {t("Discussion timer")}:
+          </span>
+          <div className="setting-area setting-area-wide" role="group" aria-labelledby="timer-label">
+            <button
+              type="button"
+              className="change-btn dec"
+              aria-label={t("Decrease timer")}
+              disabled={timerMinutes <= MIN_DISCUSSION_MINUTES}
+              onClick={() => dispatch(decTimerMinutes())}
+            >
+              <RemoveIcon fontSize="small" />
+            </button>
+            <span aria-live="polite">{t("{{minutes}} min", { minutes: timerMinutes })}</span>
+            <button
+              type="button"
+              className="change-btn inc"
+              aria-label={t("Increase timer")}
+              disabled={timerMinutes >= MAX_DISCUSSION_MINUTES}
+              onClick={() => dispatch(incTimerMinutes())}
             >
               <AddIcon fontSize="small" />
             </button>

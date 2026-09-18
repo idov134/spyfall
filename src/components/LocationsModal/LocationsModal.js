@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Modal from "@mui/material/Modal";
@@ -9,8 +8,7 @@ import ListItemText from "@mui/material/ListItemText";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { BUILT_IN_LOCATIONS, getLocationName, toLocationObject } from "../../data/locations";
-import { normalizeLocationName } from "../../game/gameLogic";
+import { useLocationSearch } from "../../hooks/useLocationSearch";
 
 import "./LocationsModal.css";
 
@@ -21,23 +19,8 @@ import "./LocationsModal.css";
  * point in the game without leaking the round's secret.
  */
 function LocationsModal({ open, onClose, customLocations = [] }) {
-  const { t, i18n } = useTranslation();
-  const [search, setSearch] = useState("");
-
-  const allLocations = useMemo(() => {
-    const merged = [...BUILT_IN_LOCATIONS, ...customLocations.map(toLocationObject)];
-    return merged
-      .map((location) => ({ id: location.id, name: getLocationName(location, i18n.language) }))
-      .sort((a, b) => a.name.localeCompare(b.name, i18n.language));
-  }, [customLocations, i18n.language]);
-
-  const filteredLocations = useMemo(() => {
-    const normalizedSearch = normalizeLocationName(search);
-    if (!normalizedSearch) return allLocations;
-    return allLocations.filter((location) =>
-      normalizeLocationName(location.name).includes(normalizedSearch)
-    );
-  }, [allLocations, search]);
+  const { t } = useTranslation();
+  const { search, setSearch, filteredLocations } = useLocationSearch(customLocations);
 
   const handleClose = () => {
     setSearch("");

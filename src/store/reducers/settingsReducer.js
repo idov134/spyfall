@@ -1,10 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { MAX_PLAYERS, MIN_PLAYERS, MIN_SPIES, normalizeLocationName } from "../../game/gameLogic";
+import {
+  DEFAULT_DISCUSSION_MINUTES,
+  MAX_DISCUSSION_MINUTES,
+  MAX_PLAYERS,
+  MIN_DISCUSSION_MINUTES,
+  MIN_PLAYERS,
+  MIN_SPIES,
+  normalizeLocationName,
+} from "../../game/gameLogic";
 
 export const initialState = {
   players: 6,
   spies: 2,
+  timerMinutes: DEFAULT_DISCUSSION_MINUTES,
   customLocations: [], // [{ id, name }]
 };
 
@@ -35,6 +44,12 @@ const settingsSlice = createSlice({
       const next = state.spies - 1;
       if (next >= MIN_SPIES) state.spies = next;
     },
+    incTimerMinutes(state) {
+      if (state.timerMinutes < MAX_DISCUSSION_MINUTES) state.timerMinutes += 1;
+    },
+    decTimerMinutes(state) {
+      if (state.timerMinutes > MIN_DISCUSSION_MINUTES) state.timerMinutes -= 1;
+    },
     addCustomLocation: {
       reducer(state, action) {
         const name = action.payload?.name;
@@ -64,9 +79,16 @@ const settingsSlice = createSlice({
     },
     // Applied once at startup with whatever was found in localStorage.
     hydrateSettings(state, action) {
-      const { players, spies, customLocations } = action.payload || {};
+      const { players, spies, customLocations, timerMinutes } = action.payload || {};
       if (Number.isInteger(players) && players >= MIN_PLAYERS) state.players = players;
       if (Number.isInteger(spies) && spies >= MIN_SPIES) state.spies = spies;
+      if (
+        Number.isInteger(timerMinutes) &&
+        timerMinutes >= MIN_DISCUSSION_MINUTES &&
+        timerMinutes <= MAX_DISCUSSION_MINUTES
+      ) {
+        state.timerMinutes = timerMinutes;
+      }
       if (Array.isArray(customLocations)) state.customLocations = customLocations;
     },
   },
@@ -77,6 +99,8 @@ export const {
   decPlayers,
   incSpies,
   decSpies,
+  incTimerMinutes,
+  decTimerMinutes,
   addCustomLocation,
   removeCustomLocation,
   hydrateSettings,

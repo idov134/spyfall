@@ -20,6 +20,10 @@ const resources = {
       "Decrease players": "Decrease players",
       "Increase spies": "Increase spies",
       "Decrease spies": "Decrease spies",
+      "Discussion timer": "Discussion timer",
+      "Increase timer": "Increase timer",
+      "Decrease timer": "Decrease timer",
+      "{{minutes}} min": "{{minutes}} min",
       "Add Places": "Add Places",
       "Add": "Add",
       "Close": "Close",
@@ -54,6 +58,14 @@ const resources = {
       "Hold to reveal": "Hold to reveal",
       "Got it, hide card": "Got it, hide card",
 
+      // Discussion timer
+      "Pause": "Pause",
+      "Resume": "Resume",
+      "End round now": "End round now",
+
+      // Timer
+      "Time's up!": "Time's up!",
+
       // Language selector
       "Select language": "Select language",
 
@@ -78,6 +90,10 @@ const resources = {
       "Decrease players": "הסר שחקן",
       "Increase spies": "הוסף מרגל",
       "Decrease spies": "הסר מרגל",
+      "Discussion timer": "טיימר דיון",
+      "Increase timer": "הוסף זמן",
+      "Decrease timer": "הפחת זמן",
+      "{{minutes}} min": "{{minutes}} דק'",
       "Add Places": "הוסף מקומות",
       "Add": "הוסף",
       "Close": "סגור",
@@ -111,6 +127,14 @@ const resources = {
       "Press and hold to reveal": "לחצו והחזיקו כדי לחשוף",
       "Hold to reveal": "החזק כדי לחשוף",
       "Got it, hide card": "הבנתי, הסתר קלף",
+
+      // Discussion timer
+      "Pause": "השהה",
+      "Resume": "המשך",
+      "End round now": "סיים סיבוב עכשיו",
+
+      // Timer
+      "Time's up!": "הזמן נגמר!",
 
       // Language selector
       "Select language": "בחר שפה",

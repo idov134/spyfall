@@ -8,6 +8,11 @@ export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 16;
 export const MIN_SPIES = 1;
 
+/** Bounds + default for the player-configurable discussion timer, in minutes. */
+export const MIN_DISCUSSION_MINUTES = 1;
+export const MAX_DISCUSSION_MINUTES = 30;
+export const DEFAULT_DISCUSSION_MINUTES = 8;
+
 /**
  * Unbiased Fisher-Yates shuffle. Returns a new array; does not mutate the
  * input. `rng` is injectable so tests can be deterministic.
@@ -111,4 +116,20 @@ export function getRevealForPlayer({ round, playerIndex, lang }) {
     return { isSpy: true, locationName: null };
   }
   return { isSpy: false, locationName: getLocationName(round.location, lang) };
+}
+
+/**
+ * Round-over resolution helpers. Both are pure comparisons against the
+ * round's already-decided roles/location — they never generate secrets,
+ * they only check a guess against what was already dealt.
+ */
+
+/** True if the accused player was actually one of the round's spies. */
+export function didCatchSpy({ round, playerIndex }) {
+  return round.roles[playerIndex] === "spy";
+}
+
+/** True if `locationId` matches the location the spy(s) actually had to blend into. */
+export function isCorrectLocationGuess({ round, locationId }) {
+  return Boolean(round.location) && round.location.id === locationId;
 }

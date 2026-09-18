@@ -95,6 +95,10 @@
   border-radius: 0.5rem;
 }
 
+.setting-area-wide {
+  width: 6.5rem;
+}
+
 .start-game-btn {
   border: 0;
   font: inherit;
