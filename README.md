@@ -1,160 +1,134 @@
 # Spyfall
 
-A browser-based, pass-the-device version of the social deduction game
-**Spyfall**, built for players sitting together in the same room.
+A browser-based, pass-the-device version of **Spyfall** for people playing
+together in the same room. It supports English and Hebrew, configurable
+round settings, custom locations, and offline installation as a PWA.
 
-## What the game is
+## How to play
 
-Everyone shares one phone, tablet, or computer. At the start of a round:
+1. Open the game on one phone, tablet, or computer.
+2. Choose the number of players, spies, and timer duration.
+3. Optionally add custom locations, then select **Start Game**.
+4. Pass the device around. Each player taps only their numbered card.
+5. The card opens privately:
+   - regular players see the shared secret location;
+   - spies see **"You are the Spy."**
+6. The player selects **"Got it, hide card"** before passing the device.
+   Viewed cards are locked during this initial reveal phase.
+7. After everyone has viewed their card, discussion begins. Players can tap
+   their own card and hold the reveal button for a private reminder.
+8. The clock is visible throughout the round. It can be paused, resumed, or
+   stopped. At `00:00`, the game displays **"Time's up!"** without exposing
+   any roles or locations.
+9. Select **New round** to reshuffle roles and choose another location.
 
-1. The group sets the total number of players and the number of spies
-   (spies must always be fewer than the total players).
-2. The app randomly picks one secret location and randomly assigns the
-   chosen number of spies among the players.
-3. Every regular player is shown the same location. Every spy is shown
-   only **"You are the Spy."** — spies never see the location.
+The locations button opens a searchable reference list containing all
+built-in and custom locations.
 
-There is no voice/text chat and no online multiplayer here: the players
-talk face-to-face. Regular players try to spot the spy without giving the
-location away; spies listen and try to guess the location before they're
-caught.
+## Privacy
 
-## How an in-person round works (pass-the-device flow)
+Secret information is shown only inside the selected player's reveal
+dialog. Closing the dialog removes the secret from view before the device
+is passed. The card grid, discussion screen, timer, and locations reference
+never identify the spy or reveal the active location.
 
-The device is passed from player to player, one at a time:
+## Settings and persistence
 
-1. The screen shows a concealed instruction: **"Pass the device to Player
-   N."** Nothing sensitive is visible yet.
-2. That player taps **"Reveal card"** on purpose to see their role.
-3. Regular players see the round's location; spies see **"You are the
-   Spy."**
-4. The player taps **"Hide card"** before handing the device to the next
-   player. The next player's role is never shown automatically.
-5. Once everyone has viewed and hidden their card, a neutral screen appears
-   ("Everyone has viewed their card") — it never reveals the location or
-   who the spies were. This is the cue to start talking.
-6. Tapping **"New round"** reshuffles the spies and picks a new location
-   (avoiding the last couple of locations when possible), and resets the
-   reveal/hide state for every player.
+Redux stores the player count, spy count, timer duration, and custom
+locations. These settings persist in `localStorage`, so they survive page
+refreshes.
 
-## Locations
+Custom locations:
 
-Built-in locations live in [`src/data/locations.js`](src/data/locations.js)
-as a small, hand-written catalog of broad, familiar places (Airport,
-Hospital, Pizza Place, Casino, Spaceship, ...) — no specific businesses or
-addresses. Each entry looks like:
+- must contain 2–30 characters;
+- cannot duplicate an existing built-in or custom location;
+- are included in future rounds;
+- can be removed from the settings screen.
 
-```js
-{
-  id: "pizza-place",
-  category: "food",
-  names: { en: "Pizza Place", he: "פיצרייה" },
-}
-```
-
-To add a new built-in location, add another entry to that array with a
-unique `id` and both an `en` and `he` name.
-
-### Custom locations
-
-Players can add their own locations from the settings screen ("Add
-Places"). Custom locations:
-
-- are validated (2–30 characters) and rejected if empty or an
-  obvious duplicate of an existing built-in/custom location,
-- are included in the random location pool for future rounds,
-- can be removed again from the settings screen,
-- persist across page refreshes via `localStorage` (see
-  [`src/store/persistence.js`](src/store/persistence.js)) — they never
-  modify `src/data/locations.js` itself.
-
-Player count, spy count, and the chosen interface language are persisted
-the same way, so refreshing the page keeps your setup.
-
-## No AI dependency
-
-This project has **no Gemini (or any other generative-AI) dependency**.
-Locations come entirely from the local catalog above plus whatever custom
-locations players add. There are no API keys, no `REACT_APP_GEMINI_*`
-environment variables, and no network calls required to play.
+Built-in locations are defined in
+[`src/data/locations.js`](src/data/locations.js), with English and Hebrew
+names.
 
 ## Languages
 
-The app supports English and Hebrew via `i18next` / `react-i18next`
-(see [`src/i18n.js`](src/i18n.js)). Hebrew renders right-to-left; English
-renders left-to-right. The language toggle (globe icon) persists the
-choice in `localStorage`, and every built-in location has both an English
-and a Hebrew name.
+The language selector supports English (LTR) and Hebrew (RTL) through
+`i18next`. The document direction updates automatically when the language
+changes.
 
-## Getting started
+## Offline PWA
 
-Install dependencies and start the dev server:
+The production build includes a Workbox service worker that precaches the
+game bundle, styles, icons, and manifest. After the first successful online
+load, the installed game can launch and run offline. Player settings remain
+available through browser storage.
+
+## Local development
+
+Requirements: Node.js and npm.
 
 ```bash
 npm install
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000/single](http://localhost:3000/single).
 
-### Running tests
+## Tests
 
 ```bash
-npm test
+npm test -- --watchAll=false
 ```
 
-This runs the full suite, including:
+The tests cover game rules, location data, persisted settings, timer
+behavior, private card reveals, discussion reminders, and round resets.
 
-- `src/game/gameLogic.test.js` — role assignment, spy-count validation,
-  location picking (with injected/deterministic RNGs so results are
-  reproducible), and that spies never receive the location while regular
-  players always share the exact same one.
-- `src/data/locations.test.js` — catalog integrity and EN/HE name lookup.
-- `src/store/reducers/settingsReducer.test.js` — player/spy bounds and
-  custom-location add/remove/deduplication.
-- `src/store/persistence.test.js` — settings round-trip through
-  `localStorage`, including corrupted-data handling.
-- `src/components/SingleDeviceGame/SingleDeviceGame.test.js` — the private
-  reveal/hide flow, that the next player's role never appears
-  automatically, the neutral discussion screen, and round resets.
-
-### Building for production
+## Production build
 
 ```bash
 npm run build
 ```
 
-Outputs an optimized build to the `build/` folder.
+This creates the optimized `build/` directory, bundles the service worker,
+and injects the precache manifest.
 
-## Project structure (relevant parts)
+GitHub Pages deployment is available through:
 
+```bash
+npm run deploy
 ```
+
+Before deploying from a fork, update the `homepage` field in `package.json`
+to the fork's GitHub Pages URL.
+
+## Project structure
+
+```text
+public/
+  manifest.json                     PWA metadata and icons
+scripts/
+  generate-sw.js                    Service-worker build and precache step
 src/
-  data/locations.js          Built-in location catalog (EN/HE)
-  game/gameLogic.js          Pure game rules: shuffle, validation,
-                              role assignment, location picking, reveals
-  store/
-    reducers/settingsReducer.js  players / spies / customLocations
-    persistence.js               localStorage load/save helpers
+  data/locations.js                 Built-in EN/HE location catalog
+  game/gameLogic.js                 Pure game rules and validation
   components/
-    SingleDevice/               Toggles between Settings and Game
-    SingleDeviceSettings/       Player/spy steppers, custom locations
-    SingleDeviceGame/           Pass-device reveal/hide + discussion screen
-    AddPlaces/, InputPopUp/     Custom-location UI
+    NavBar/                         Language selector and locations access
+    LocationsModal/                 Searchable location reference
+    SingleDeviceSettings/           Player, spy, timer, and location settings
+    SingleDeviceGame/               Card grid, private reveal, and timer
+  hooks/useLocationSearch.js        Shared location filtering
+  store/
+    reducers/settingsReducer.js     Persistent game settings
+    persistence.js                  localStorage load/save
+  service-worker.js                 Workbox offline behavior
+  serviceWorkerRegistration.js      Browser service-worker registration
 ```
 
-Game logic is kept separate from the React components so it can be unit
-tested independently of rendering.
+## Current limitations
 
-## Current limitations / possible future features
-
-- **Multiplayer rooms**: "Create Room" is visible in the menu but disabled
-  ("Coming soon") — there is no server, room codes, or real-time sync yet.
-- **No timer, voting, or scoring**: rounds only handle secret role/location
-  distribution; discussion, voting, and a winner screen are not
-  implemented.
-- **No round history**: past locations/roles aren't recorded beyond the
-  short anti-repeat window used to avoid back-to-back repeats.
-- **Build tooling**: this app still uses Create React App (`react-scripts`
-  5), which is in maintenance mode; migrating to Vite would be a
-  reasonable future improvement but wasn't required here.
+- Multiplayer rooms are not implemented; the game is local,
+  pass-the-device play only.
+- Voting, scoring, and winner screens are handled by the players, not the
+  app.
+- There is no full round history.
+- The project still uses Create React App 5, which is no longer actively
+  maintained.
